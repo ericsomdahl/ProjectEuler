@@ -10,10 +10,7 @@ object Problem001S {
     Stream.from(1, 1)
       .takeWhile(_ < below)
       .filter(value => {
-        multiples.exists( multiple => {
-          if (value % multiple == 0 ) true
-          else false
-        })
+        multiples.exists(value % _ == 0)
       })
       .sum
   }
