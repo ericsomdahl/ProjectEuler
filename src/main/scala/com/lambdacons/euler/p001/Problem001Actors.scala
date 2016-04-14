@@ -2,6 +2,8 @@ package com.lambdacons.euler.p001
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
+import scala.concurrent.Await
+
 
 /**
   * Created by eric on 3/30/16.
@@ -40,11 +42,12 @@ object Problem001Actors {
   }
 
   class FilteringActor(summingActor: ActorRef) extends Actor {
-    var multiples = Array(3, 5)
+    var multiples = Array(2, 5)
     def receive = {
       case SetFilterMsg(multiple) =>
         println("Set Filter message " + multiple)
         this.multiples = multiple
+        sender ! "Filter Set"
 
       case ProcessNumberMsg(number) =>
         if(multiples.exists(number % _ == 0)) {
@@ -68,12 +71,22 @@ object Problem001Actors {
 
   object AkkaProblem1 extends App {
 
+    import akka.pattern.ask
+    import akka.util.Timeout
+    import scala.concurrent.duration._
+
     override def main(args: Array[String]): Unit = {
+      implicit val timeout = Timeout(5 seconds)
+
       val system = ActorSystem("ActorSystem")
       val summer = system.actorOf(Props(new SummingActor()))
       val filter = system.actorOf(Props(new FilteringActor(summer)))
       val source = system.actorOf(Props(new SourcingActor(filter)))
       val router = system.actorOf(Props(new RoutingActor(source)))
+
+      val future = filter ? new SetFilterMsg(Array(3,5))
+      val result = Await.result(future, 1 second).asInstanceOf[String]
+      println(result)
 
       router ! new StartMsg(1000)
     }
