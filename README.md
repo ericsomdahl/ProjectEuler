@@ -1,5 +1,3 @@
 # ProjectEuler
 
-Just some solutions to Project Euler. 
-
-More test changes
+Just some solutions to Project Euler.
